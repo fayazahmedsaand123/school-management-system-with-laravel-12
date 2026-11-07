@@ -79,26 +79,35 @@ class AttendanceController extends Controller {
             }
         }
 
+        // Bulk insert/update — much faster!
+        $records = [];
+        $now = now();
+
         foreach ($request->attendance as $studentId => $status) {
-            Attendance::updateOrCreate(
-                [
-                    'student_id' => $studentId,
-                    'date'       => $request->date,
-                ],
-                [
-                    'class_id'   => $request->class_id,
-                    'section_id' => $request->section_id,
-                    'status'     => $status,
-                    'marked_by'  => auth()->id(),
-                    'remarks'    => $request->remarks[$studentId] ?? null,
-                ]
-            );
+            $records[] = [
+                'student_id' => $studentId,
+                'class_id'   => $request->class_id,
+                'section_id' => $request->section_id,
+                'date'       => $request->date,
+                'status'     => $status,
+                'marked_by'  => auth()->id(),
+                'remarks'    => $request->remarks[$studentId] ?? null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
         }
+
+        // One single query instead of many!
+        Attendance::upsert(
+            $records,
+            ['student_id', 'date'],
+            ['class_id', 'section_id', 'status', 'marked_by', 'remarks', 'updated_at']
+        );
 
         return redirect()->route('dashboard.attendance.index')
             ->with('success', 'Attendance marked successfully for ' . $request->date);
     }
-
+    
     public function report(Request $request) {
         $month   = $request->get('month', date('m'));
         $year    = $request->get('year', date('Y'));
