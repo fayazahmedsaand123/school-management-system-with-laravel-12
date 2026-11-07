@@ -24,12 +24,15 @@ class StudentController extends Controller {
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
+        // CORRECT:
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('user', fn($q) => $q->where('name', 'like', "%$search%")
-                ->orWhere('email', 'like', "%$search%"))
-                ->orWhere('roll_number', 'like', "%$search%")
-                ->orWhere('admission_number', 'like', "%$search%");
+            $query->where(function($q) use ($search) {
+                $q->whereHas('user', fn($u) => $u->where('name', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%"))
+                    ->orWhere('roll_number', 'like', "%$search%")
+                    ->orWhere('admission_number', 'like', "%$search%");
+            });
         }
         $students     = $query->latest()->paginate(15);
         $classes      = SchoolClass::all();
@@ -64,11 +67,12 @@ class StudentController extends Controller {
             $photoName = time() . '.' . $request->photo->extension();
             $request->photo->storeAs('photos', $photoName, 'public');
         }
+        $password = Str::random(10);
         // Create user
         $user = User::create([
             'name'          => $request->name,
             'email'         => $request->email,
-            'password'      => Hash::make('password123'),
+            'password'      => Hash::make($password),
             'phone'         => $request->phone,
             'date_of_birth' => $request->date_of_birth,
             'gender'        => $request->gender,
@@ -78,8 +82,8 @@ class StudentController extends Controller {
         ]);
         $user->assignRole('student');
         // Generate admission & roll number
-        $admissionNumber = 'ADM-' . date('Y') . '-' . str_pad(Student::count() + 1, 4, '0', STR_PAD_LEFT);
-        $rollNumber      = $request->class_id . $request->section_id . str_pad(Student::count() + 1, 3, '0', STR_PAD_LEFT);
+        $admissionNumber = 'ADM-' . date('Y') . '-' . str_pad(Student::max('id') + 1, 4, '0', STR_PAD_LEFT);
+        $rollNumber = $request->class_id . $request->section_id . str_pad(Student::max('id') + 1, 3, '0', STR_PAD_LEFT);
         Student::create([
             'user_id'          => $user->id,
             'roll_number'      => $rollNumber,
@@ -101,7 +105,8 @@ class StudentController extends Controller {
             '#2563eb'
         );
         return redirect()->route('dashboard.students.index')
-            ->with('success', 'Student registered successfully! Default password: password123');
+            // CORRECT:
+            ->with('success', 'Student registered successfully! Password: ' . $password);
     }
 
     public function show(Student $student) {
