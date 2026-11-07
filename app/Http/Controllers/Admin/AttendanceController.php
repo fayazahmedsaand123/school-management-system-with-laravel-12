@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class AttendanceController extends Controller {
+
     public function index(Request $request) {
         $date    = $request->get('date', today()->toDateString());
         $classId = $request->get('class_id');
@@ -56,11 +57,28 @@ class AttendanceController extends Controller {
 
     public function store(Request $request) {
         $request->validate([
-            'date'       => 'required|date',
-            'class_id'   => 'required|exists:classes,id',
-            'section_id' => 'required|exists:sections,id',
-            'attendance' => 'required|array',
+            'date'          => 'required|date',
+            'class_id'      => 'required|exists:classes,id',
+            'section_id'    => 'required|exists:sections,id',
+            'attendance'    => 'required|array',
+            'attendance.*'  => 'in:present,absent,late,half_day',
         ]);
+
+        // Verify all student IDs belong to this class and section
+        $validStudentIds = Student::where('class_id', $request->class_id)
+            ->where('section_id', $request->section_id)
+            ->where('status', 'active')
+            ->pluck('id')
+            ->toArray();
+
+        foreach (array_keys($request->attendance) as $studentId) {
+            if (!in_array($studentId, $validStudentIds)) {
+                return back()->withErrors([
+                    'attendance' => 'Invalid student ID: ' . $studentId
+                ]);
+            }
+        }
+
         foreach ($request->attendance as $studentId => $status) {
             Attendance::updateOrCreate(
                 [
@@ -76,6 +94,7 @@ class AttendanceController extends Controller {
                 ]
             );
         }
+
         return redirect()->route('dashboard.attendance.index')
             ->with('success', 'Attendance marked successfully for ' . $request->date);
     }
