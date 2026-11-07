@@ -94,8 +94,37 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
         ->middleware('permission:delete students');
 
     // Teachers
-    Route::resource('teachers', TeacherController::class)->middleware('permission:view teachers');
-    Route::get('teachers/{teacher}/salary', [TeacherController::class, 'salary'])->name('teachers.salary');
+    Route::get('teachers', [TeacherController::class, 'index'])
+        ->name('teachers.index')
+        ->middleware('permission:view teachers');
+
+    Route::get('teachers/create', [TeacherController::class, 'create'])
+        ->name('teachers.create')
+        ->middleware('permission:create teachers');
+
+    Route::post('teachers', [TeacherController::class, 'store'])
+        ->name('teachers.store')
+        ->middleware('permission:create teachers');
+
+    Route::get('teachers/{teacher}', [TeacherController::class, 'show'])
+        ->name('teachers.show')
+        ->middleware('permission:view teachers');
+
+    Route::get('teachers/{teacher}/edit', [TeacherController::class, 'edit'])
+        ->name('teachers.edit')
+        ->middleware('permission:edit teachers');
+
+    Route::put('teachers/{teacher}', [TeacherController::class, 'update'])
+        ->name('teachers.update')
+        ->middleware('permission:edit teachers');
+
+    Route::delete('teachers/{teacher}', [TeacherController::class, 'destroy'])
+        ->name('teachers.destroy')
+        ->middleware('permission:delete teachers');
+
+    Route::get('teachers/{teacher}/salary', [TeacherController::class, 'salary'])
+        ->name('teachers.salary')
+        ->middleware('permission:view teachers');
 
     // Classes
     Route::resource('classes', ClassController::class)->middleware('permission:view classes');
