@@ -161,7 +161,15 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('attendance/ajax/students', [AttendanceController::class, 'getStudentsByClass'])->name('attendance.ajax.students');
 
     // Exams
-    Route::resource('exams', ExamController::class)->middleware('permission:view exams');
+    Route::get('exams', [ExamController::class, 'index'])->name('exams.index')->middleware('permission:view exams');
+    Route::get('exams/create', [ExamController::class, 'create'])->name('exams.create')->middleware('permission:create exams');
+    Route::post('exams', [ExamController::class, 'store'])->name('exams.store')->middleware('permission:create exams');
+    Route::get('exams/{exam}', [ExamController::class, 'show'])->name('exams.show')->middleware('permission:view exams');
+    Route::get('exams/{exam}/edit', [ExamController::class, 'edit'])->name('exams.edit')->middleware('permission:edit exams');
+    Route::put('exams/{exam}', [ExamController::class, 'update'])->name('exams.update')->middleware('permission:edit exams');
+    Route::delete('exams/{exam}', [ExamController::class, 'destroy'])->name('exams.destroy')->middleware('permission:delete exams');
+
+
     Route::get('marks/entry', [MarkController::class, 'entryForm'])->name('marks.entry')->middleware('permission:view marks');
     Route::post('marks/entry', [MarkController::class, 'store'])->name('marks.store')->middleware('permission:create marks');
     Route::get('marks/report-card/{student}/{exam}', [MarkController::class, 'reportCard'])->name('marks.report-card')->middleware('permission:view marks');
@@ -194,11 +202,24 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     });
 
     // Assignments
-    Route::resource('assignments', AssignmentController::class)->middleware('permission:view assignments');
-    Route::post('assignments/{assignment}/submit', [AssignmentController::class, 'submit'])->name('assignments.submit');
+    Route::get('assignments', [AssignmentController::class, 'index'])->name('assignments.index')->middleware('permission:view assignments');
+    Route::get('assignments/create', [AssignmentController::class, 'create'])->name('assignments.create')->middleware('permission:create assignments');
+    Route::post('assignments', [AssignmentController::class, 'store'])->name('assignments.store')->middleware('permission:create assignments');
+    Route::get('assignments/{assignment}', [AssignmentController::class, 'show'])->name('assignments.show')->middleware('permission:view assignments');
+    Route::get('assignments/{assignment}/edit', [AssignmentController::class, 'edit'])->name('assignments.edit')->middleware('permission:edit assignments');
+    Route::put('assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update')->middleware('permission:edit assignments');
+    Route::delete('assignments/{assignment}', [AssignmentController::class, 'destroy'])->name('assignments.destroy')->middleware('permission:delete assignments');
+    Route::post('assignments/{assignment}/submit', [AssignmentController::class, 'submit'])->name('assignments.submit')->middleware('permission:view assignments');
+
 
     // Notices
-    Route::resource('notices', NoticeController::class)->middleware('permission:view notices');
+    Route::get('notices', [NoticeController::class, 'index'])->name('notices.index')->middleware('permission:view notices');
+    Route::get('notices/create', [NoticeController::class, 'create'])->name('notices.create')->middleware('permission:create notices');
+    Route::post('notices', [NoticeController::class, 'store'])->name('notices.store')->middleware('permission:create notices');
+    Route::get('notices/{notice}', [NoticeController::class, 'show'])->name('notices.show')->middleware('permission:view notices');
+    Route::get('notices/{notice}/edit', [NoticeController::class, 'edit'])->name('notices.edit')->middleware('permission:edit notices');
+    Route::put('notices/{notice}', [NoticeController::class, 'update'])->name('notices.update')->middleware('permission:edit notices');
+    Route::delete('notices/{notice}', [NoticeController::class, 'destroy'])->name('notices.destroy')->middleware('permission:delete notices');
 
     // Events
     Route::resource('events', EventController::class)->middleware('permission:view events');
