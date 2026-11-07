@@ -127,9 +127,31 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
         ->middleware('permission:view teachers');
 
     // Classes
-    Route::resource('classes', ClassController::class)->middleware('permission:view classes');
-    Route::resource('sections', SectionController::class)->middleware('permission:view classes');
-    Route::resource('subjects', SubjectController::class)->middleware('permission:view classes');
+    Route::get('classes', [ClassController::class, 'index'])->name('classes.index')->middleware('permission:view classes');
+    Route::get('classes/create', [ClassController::class, 'create'])->name('classes.create')->middleware('permission:create classes');
+    Route::post('classes', [ClassController::class, 'store'])->name('classes.store')->middleware('permission:create classes');
+    Route::get('classes/{class}', [ClassController::class, 'show'])->name('classes.show')->middleware('permission:view classes');
+    Route::get('classes/{class}/edit', [ClassController::class, 'edit'])->name('classes.edit')->middleware('permission:edit classes');
+    Route::put('classes/{class}', [ClassController::class, 'update'])->name('classes.update')->middleware('permission:edit classes');
+    Route::delete('classes/{class}', [ClassController::class, 'destroy'])->name('classes.destroy')->middleware('permission:delete classes');
+
+    // Sections
+    Route::get('sections', [SectionController::class, 'index'])->name('sections.index')->middleware('permission:view classes');
+    Route::get('sections/create', [SectionController::class, 'create'])->name('sections.create')->middleware('permission:create classes');
+    Route::post('sections', [SectionController::class, 'store'])->name('sections.store')->middleware('permission:create classes');
+    Route::get('sections/{section}', [SectionController::class, 'show'])->name('sections.show')->middleware('permission:view classes');
+    Route::get('sections/{section}/edit', [SectionController::class, 'edit'])->name('sections.edit')->middleware('permission:edit classes');
+    Route::put('sections/{section}', [SectionController::class, 'update'])->name('sections.update')->middleware('permission:edit classes');
+    Route::delete('sections/{section}', [SectionController::class, 'destroy'])->name('sections.destroy')->middleware('permission:delete classes');
+
+    // Subjects
+    Route::get('subjects', [SubjectController::class, 'index'])->name('subjects.index')->middleware('permission:view classes');
+    Route::get('subjects/create', [SubjectController::class, 'create'])->name('subjects.create')->middleware('permission:create classes');
+    Route::post('subjects', [SubjectController::class, 'store'])->name('subjects.store')->middleware('permission:create classes');
+    Route::get('subjects/{subject}', [SubjectController::class, 'show'])->name('subjects.show')->middleware('permission:view classes');
+    Route::get('subjects/{subject}/edit', [SubjectController::class, 'edit'])->name('subjects.edit')->middleware('permission:edit classes');
+    Route::put('subjects/{subject}', [SubjectController::class, 'update'])->name('subjects.update')->middleware('permission:edit classes');
+    Route::delete('subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.destroy')->middleware('permission:delete classes');
 
     // Attendance
     Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index')->middleware('permission:view attendance');
