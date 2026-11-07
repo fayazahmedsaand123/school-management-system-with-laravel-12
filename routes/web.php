@@ -167,8 +167,14 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('marks/report-card/{student}/{exam}', [MarkController::class, 'reportCard'])->name('marks.report-card')->middleware('permission:view marks');
 
     // Fees
-    Route::resource('fees', FeeController::class)->middleware('permission:view fees');
-    Route::get('fees/{fee}/receipt', [FeeController::class, 'receipt'])->name('fees.receipt');
+    Route::get('fees', [FeeController::class, 'index'])->name('fees.index')->middleware('permission:view fees');
+    Route::get('fees/create', [FeeController::class, 'create'])->name('fees.create')->middleware('permission:create fees');
+    Route::post('fees', [FeeController::class, 'store'])->name('fees.store')->middleware('permission:create fees');
+    Route::get('fees/{fee}', [FeeController::class, 'show'])->name('fees.show')->middleware('permission:view fees');
+    Route::get('fees/{fee}/edit', [FeeController::class, 'edit'])->name('fees.edit')->middleware('permission:edit fees');
+    Route::put('fees/{fee}', [FeeController::class, 'update'])->name('fees.update')->middleware('permission:edit fees');
+    Route::delete('fees/{fee}', [FeeController::class, 'destroy'])->name('fees.destroy')->middleware('permission:delete fees');
+    Route::get('fees/{fee}/receipt', [FeeController::class, 'receipt'])->name('fees.receipt')->middleware('permission:view fees');
     Route::post('fees/{fee}/collect', [FeeController::class, 'collect'])->name('fees.collect')->middleware('permission:collect fees');
 
     // Library
