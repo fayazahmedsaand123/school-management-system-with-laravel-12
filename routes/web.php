@@ -83,14 +83,14 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index')->middleware('permission:view attendance');
     Route::get('attendance/mark', [AttendanceController::class, 'markForm'])->name('attendance.mark')->middleware('permission:mark attendance');
     Route::post('attendance/mark', [AttendanceController::class, 'store'])->name('attendance.store')->middleware('permission:mark attendance');
-    Route::get('attendance/report', [AttendanceController::class, 'report'])->name('attendance.report');
+    Route::get('attendance/report', [AttendanceController::class, 'report'])->name('attendance.report')->middleware('permission:view attendance');
     Route::get('attendance/ajax/students', [AttendanceController::class, 'getStudentsByClass'])->name('attendance.ajax.students');
 
     // Exams
     Route::resource('exams', ExamController::class)->middleware('permission:view exams');
-    Route::get('marks/entry', [MarkController::class, 'entryForm'])->name('marks.entry');
-    Route::post('marks/entry', [MarkController::class, 'store'])->name('marks.store');
-    Route::get('marks/report-card/{student}/{exam}', [MarkController::class, 'reportCard'])->name('marks.report-card');
+    Route::get('marks/entry', [MarkController::class, 'entryForm'])->name('marks.entry')->middleware('permission:view marks');
+    Route::post('marks/entry', [MarkController::class, 'store'])->name('marks.store')->middleware('permission:create marks');
+    Route::get('marks/report-card/{student}/{exam}', [MarkController::class, 'reportCard'])->name('marks.report-card')->middleware('permission:view marks');
 
     // Fees
     Route::resource('fees', FeeController::class)->middleware('permission:view fees');
@@ -121,17 +121,17 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::resource('notices', NoticeController::class)->middleware('permission:view notices');
 
     // Events
-    Route::resource('events', EventController::class);
+    Route::resource('events', EventController::class)->middleware('permission:view events');
 
     // Messages
     Route::resource('messages', MessageController::class)->only(['index','show','destroy']);
 
     // Reports
-    Route::get('reports/students', [ReportController::class, 'students'])->name('reports.students')->middleware('permission:view reports');
-    Route::get('reports/attendance', [ReportController::class, 'attendance'])->name('reports.attendance');
-    Route::get('reports/fees', [ReportController::class, 'fees'])->name('reports.fees');
-    Route::get('reports/exams', [ReportController::class, 'exams'])->name('reports.exams');
-    Route::get('reports/export/{type}/{format}', [ReportController::class, 'export'])->name('reports.export');
+    Route::get('reports/students', [ReportController::class, 'students'])->name('reports.students')->middleware('permission:view reports');    
+    Route::get('reports/attendance', [ReportController::class, 'attendance'])->name('reports.attendance')->middleware('permission:view reports');
+    Route::get('reports/fees', [ReportController::class, 'fees'])->name('reports.fees')->middleware('permission:view reports');
+    Route::get('reports/exams', [ReportController::class, 'exams'])->name('reports.exams')->middleware('permission:view reports');
+    Route::get('reports/export/{type}/{format}', [ReportController::class, 'export'])->name('reports.export')->middleware('permission:view reports');
 
     // Profile
     Route::get('profile', [ProfileController::class, 'index'])->name('profile');
