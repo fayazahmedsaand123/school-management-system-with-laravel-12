@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class ReportController extends Controller {
+
     public function students(Request $request) {
         $query = Student::with('user', 'class', 'section');
         if ($request->filled('class_id')) {
@@ -24,17 +25,23 @@ class ReportController extends Controller {
         if ($request->filled('gender')) {
             $query->whereHas('user', fn($q) => $q->where('gender', $request->gender));
         }
-        $students = $query->get();
-        $classes  = SchoolClass::all();
+
+        // Summary from DB — not from collection
         $summary = [
-            'total'    => $students->count(),
-            'active'   => $students->where('status', 'active')->count(),
-            'inactive' => $students->where('status', 'inactive')->count(),
-            'male'     => $students->filter(fn($s) => $s->user->gender === 'male')->count(),
-            'female'   => $students->filter(fn($s) => $s->user->gender === 'female')->count(),
+            'total'    => (clone $query)->count(),
+            'active'   => (clone $query)->where('status', 'active')->count(),
+            'inactive' => (clone $query)->where('status', 'inactive')->count(),
+            'male'     => (clone $query)->whereHas('user', fn($q) => $q->where('gender', 'male'))->count(),
+            'female'   => (clone $query)->whereHas('user', fn($q) => $q->where('gender', 'female'))->count(),
         ];
+
+        // Paginate instead of get()
+        $students = $query->paginate(20);
+        $classes  = SchoolClass::all();
+
         return view('reports.students', compact('students', 'classes', 'summary'));
     }
+
 
     public function attendance(Request $request) {
         $month   = $request->get('month', date('m'));
@@ -44,8 +51,11 @@ class ReportController extends Controller {
             $q->whereMonth('date', $month)->whereYear('date', $year);
         }])->where('status', 'active');
         if ($classId) $query->where('class_id', $classId);
-        $students = $query->get();
+
+        // Paginate instead of get()
+        $students = $query->paginate(20);
         $classes  = SchoolClass::all();
+
         return view('reports.attendance', compact('students', 'classes', 'month', 'year'));
     }
 
@@ -53,19 +63,26 @@ class ReportController extends Controller {
         $query = Fee::with('student.user', 'feeType');
         if ($request->filled('status')) $query->where('status', $request->status);
         if ($request->filled('month'))  $query->where('month', $request->month);
-        $fees = $query->get();
+
+        // Summary from DB — not from collection
         $summary = [
-            'total_amount'    => $fees->sum('amount'),
-            'total_collected' => $fees->sum('paid_amount'),
-            'total_pending'   => $fees->where('status', 'pending')->sum('amount'),
-            'total_paid'      => $fees->where('status', 'paid')->count(),
-            'total_pending_count' => $fees->where('status', 'pending')->count(),
+            'total_amount'        => (clone $query)->sum('amount'),
+            'total_collected'     => (clone $query)->sum('paid_amount'),
+            'total_pending'       => (clone $query)->where('status', 'pending')->sum('amount'),
+            'total_paid'          => (clone $query)->where('status', 'paid')->count(),
+            'total_pending_count' => (clone $query)->where('status', 'pending')->count(),
         ];
+
+        // Paginate instead of get()
+        $fees = $query->paginate(20);
+
         return view('reports.fees', compact('fees', 'summary'));
     }
 
+
     public function exams(Request $request) {
-        $exams = Exam::with('academicYear')->get();
+        //  Paginate instead of get()
+        $exams = Exam::with('academicYear')->paginate(20);
         return view('reports.exams', compact('exams'));
     }
 
