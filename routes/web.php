@@ -65,10 +65,33 @@ Route::middleware(['auth'])->prefix('dashboard')->name('dashboard.')->group(func
     Route::resource('users', UserController::class)->middleware('role:super_admin|admin');
 
     // Students
-    Route::resource('students', StudentController::class)->middleware('permission:view students');
-    Route::get('students/{student}/id-card', [StudentController::class, 'idCard'])->name('students.id-card');
-    Route::get('students/{student}/promote', [StudentController::class, 'promoteForm'])->name('students.promote.form');
-    Route::post('students/{student}/promote', [StudentController::class, 'promote'])->name('students.promote');
+    Route::get('students', [StudentController::class, 'index'])
+        ->name('students.index')
+        ->middleware('permission:view students');
+
+    Route::get('students/create', [StudentController::class, 'create'])
+        ->name('students.create')
+        ->middleware('permission:create students');
+
+    Route::post('students', [StudentController::class, 'store'])
+        ->name('students.store')
+        ->middleware('permission:create students');
+
+    Route::get('students/{student}', [StudentController::class, 'show'])
+        ->name('students.show')
+        ->middleware('permission:view students');
+
+    Route::get('students/{student}/edit', [StudentController::class, 'edit'])
+        ->name('students.edit')
+        ->middleware('permission:edit students');
+
+    Route::put('students/{student}', [StudentController::class, 'update'])
+        ->name('students.update')
+        ->middleware('permission:edit students');
+
+    Route::delete('students/{student}', [StudentController::class, 'destroy'])
+        ->name('students.destroy')
+        ->middleware('permission:delete students');
 
     // Teachers
     Route::resource('teachers', TeacherController::class)->middleware('permission:view teachers');
